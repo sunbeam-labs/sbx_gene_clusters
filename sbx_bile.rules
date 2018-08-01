@@ -1,0 +1,81 @@
+# -*- mode: Snakemake -*-
+#
+# Chunyu Zhao 2018-07-23
+# Reads mapping to BAI and BSH genes:
+#   Rules for BLAST* reads against small databases
+
+
+GENES_DIR = Cfg['sbx_bile']['bile_fp']
+GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
+GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
+GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
+
+TARGET_BILE = expand(str(MAPPING_FP/'sbx_bile'/'{gene}'/'{sample}_1.tblastx'), 
+                     gene=GENES_DICT.keys(), sample=Samples.keys())
+
+rule _all_bile:
+ input:
+   TARGET_BILE
+
+rule merge_pairs:
+ message: "not now stay tuned"
+ input:
+  r1 = str(QC_FP/'decontam'/'{sample}_1.fastq.gz'),
+  r2 = str(QC_FP/'decontam'/'{sample}_2.fastq.gz')
+ output:
+  r1 = str(MAPPING_FP/'merged'/'{sample}.fastq')
+ threads:
+  Cfg['blast']['threads']
+ shell:
+  """
+  vsearch --fastq_mergepairs {input.r1} --reverse {input.r2} \
+          --fastqout {output.reads} --threads {threads} \
+  	  --fastq_allowmergestagger --fastq_maxdiffs 5 \
+  	  --fastq_minovlen 10 --fastq_minmergelen 100
+  """
+
+rule _test_blast_db:
+ input:
+  expand(str(GENES_DIR/'{gene}.fasta.{index}'),index=['psq','pin','phr'], gene=GENES_DICT.keys())
+
+rule build_blast_db:
+ input:
+  lambda wildcards: GENES_DICT[wildcards.gene]
+ output:
+  expand(str(GENES_DIR/'{{gene}}.fasta.{index}'),index=['psq','pin','phr'])
+ shell:
+  """
+  makeblastdb -in {input} -dbtype prot
+  """
+
+rule _all_fa:
+ input: 
+  expand(str(MAPPING_FP/'R1'/'{sample}_1.fasta'), sample=Samples.keys() )
+rule fq_2_fa:
+ input:
+  str(QC_FP/'decontam'/'{sample}_1.fastq.gz')
+ output:
+  str(MAPPING_FP/'R1'/'{sample}_1.fasta')
+ shell:
+  """
+  seqtk seq -a < <(gzip -cd {input}) > {output}
+  """
+
+rule blastx_reads:
+ input:
+  read = str(MAPPING_FP/'R1'/'{sample}_1.fasta'),
+  db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['psq','pin','phr'])
+ output:
+  str(MAPPING_FP/'sbx_bile'/'{gene}'/'{sample}_1.tblastx')
+ params:
+  db=lambda wildcard: GENES_DICT[wildcard.gene]
+ threads:
+  Cfg['sbx_bile']['threads']
+ shell:
+  """
+  blastx -query {input.read} -db {params.db} \
+          -num_threads {threads} -evalue 1e-6 \
+          -max_target_seqs 10 \
+          -out {output} \
+          -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
+  """
