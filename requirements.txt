@@ -1,1 +1,2 @@
 seqtk
+diamond
