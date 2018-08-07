@@ -12,4 +12,28 @@ Reads-level based alignment to gene clusters of interest, e.g. bai operon or but
   git clone https://github.com/sunbeam-labs/sbx_gene_clusters
   ```
   
- 2. Add the 
+ 2. Add the new config options to your config file
+ 
+  ```bash
+  cat sunbeam/extensions/sbx_gene_clusters/config.yml >> sunbeam_config.yml
+  ```
+ 
+ 3. Install the requirements:
+ 
+  ```bash
+  conda install --file extensions/sbx_gene_clusters/requirements.txt
+  ```
+  
+ 4. Run time
+
+ - Use diamond
+ 
+  ```bash
+  sunbeam run -- --configfile sunbeam_config.yml _all_genes
+  ```
+ 
+ - Use blast
+ 
+  ```bash
+  sunbeam run -- --configfile sunbeam_config.yml _all_genes_blast
+  ```
