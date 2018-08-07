@@ -103,7 +103,7 @@ rule diamond_reads:
           --threads {threads} --evalue 1e-10 \
           --max-target-seqs 0 \
           --out {output} \
-          -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart sen$
+          --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore
   """
 
 rule blastx_reads:
