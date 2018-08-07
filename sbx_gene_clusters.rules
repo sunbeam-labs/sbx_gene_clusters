@@ -98,7 +98,7 @@ rule diamond_reads:
   Cfg['sbx_gene_clusters']['threads']
  shell:
   """
-  diamond blastx 
+  diamond blastx \
           --db {input.db} --query {input.read} \
           --threads {threads} --evalue 1e-10 \
           --max-target-seqs 0 \
