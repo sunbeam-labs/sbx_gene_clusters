@@ -100,7 +100,7 @@ rule diamond_reads:
   """
   diamond blastx \
           --db {input.db} --query {input.read} \
-          --threads {threads} --evalue 1e-10 \
+          --threads {threads} --evalue 1e-6 \
           --max-target-seqs 0 \
           --out {output} \
           --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore
