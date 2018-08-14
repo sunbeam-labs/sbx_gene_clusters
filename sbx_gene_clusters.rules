@@ -124,3 +124,26 @@ rule blastx_reads:
          -out {output} \
          -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
   """
+
+
+rule _all_genes_contigs:
+ input:
+  expand(str(ANNOTATION_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_contigs.blastx'),
+             gene=GENES_DICT.keys(), sample=Samples.keys())
+
+rule blastx_contigs:
+ input:
+  contig = str(ASSEMBLY_FP/'contigs'/'{sample}-contigs.fa'),
+  db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['psq','pin','phr'])
+ output:
+  str(ANNOTATION_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_contigs.blastx')
+ threads: 4
+ shell:
+  """
+  blastx -query {input.contig} -out {output} -num_threads {threads}  \
+         -evalue 1e-6 -max_target_seqs 100 -db {input.db} \
+         -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
+  """
+
+
+
