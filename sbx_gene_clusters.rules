@@ -16,6 +16,11 @@ TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_1.m8
 TARGET_GENES_BLAST = expand(str(MAPPING_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_1.blastx'), 
                      gene=GENES_DICT.keys(), sample=Samples.keys())
 
+TARGET_CARD = [expand(str(MAPPING_FP/'sbx_gene_clusters'/'card_20180628'/'{sample}_1.blastx'), gene=GENES_DICT.keys(), sample=Samples.keys()),
+               expand(str(ANNOTATION_FP/'sbx_gene_clusters'/'card_20180628'/'{sample}_contigs.blastx'), gene=GENES_DICT.keys(), sample=Samples.keys())]
+rule _all_card:
+ input:
+  TARGET_CARD
 
 rule _all_genes:
  input:
@@ -137,13 +142,12 @@ rule blastx_contigs:
   db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['psq','pin','phr'])
  output:
   str(ANNOTATION_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_contigs.blastx')
- threads: 4
+ params:
+  db=lambda wildcard: GENES_DICT[wildcard.gene]
+ threads: Cfg['sbx_gene_clusters']['threads']
  shell:
   """
   blastx -query {input.contig} -out {output} -num_threads {threads}  \
          -evalue 1e-6 -max_target_seqs 100 -db {input.db} \
          -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
   """
-
-
-
