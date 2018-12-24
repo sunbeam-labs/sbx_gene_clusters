@@ -1,3 +1,3 @@
 sbx_gene_clusters:
   threads: 8
-  genes_fp: /scr1/users/zhaoc1/sunbeam_databases/dbs
+  genes_fp: "{PROJECT_FP}"/mapping/sbx_gene_family/database
