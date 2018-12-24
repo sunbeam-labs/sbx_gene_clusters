@@ -1,6 +1,13 @@
-# sbx_gene_families
+# sbx_gene_family
 
-Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details.
+Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. 
+
+Take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. First download the uniref50.fasta into your current `sunbeam_output/mapping/sbx_gene_family/databases/`.
+
+ ```bash
+ mkdir -p sunbeam_output/mapping/sbx_gene_family/database/
+ wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref50/uniref50.fasta.gz -P sunbeam_output/mapping/sbx_gene_family/database/
+ ```
 
 ## Usage
 
@@ -32,8 +39,3 @@ Reads-level based alignment to gene clusters of interest, e.g. bai operon or but
   sunbeam run -- --configfile sunbeam_config.yml _all_genes
   ```
  
- - Use blast
- 
-  ```bash
-  sunbeam run -- --configfile sunbeam_config.yml _all_genes_blast
-  ```
