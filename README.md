@@ -37,6 +37,6 @@ Take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. F
  - Use diamond
  
   ```bash
-  sunbeam run -- --configfile sunbeam_config.yml _all_genes
+  sunbeam run -- --configfile sunbeam_config.yml all_gene_family
   ```
  
