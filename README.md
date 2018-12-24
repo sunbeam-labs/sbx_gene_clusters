@@ -8,6 +8,7 @@ Take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. F
  mkdir -p sunbeam_output/mapping/sbx_gene_family/database/
  wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref50/uniref50.fasta.gz -P sunbeam_output/mapping/sbx_gene_family/database/
  ```
+ Second, update the `config.yml` with the proper path.
 
 ## Usage
 
