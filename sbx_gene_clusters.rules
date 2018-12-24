@@ -4,7 +4,6 @@
 # Reads mapping to gene clusters/pathways/gene families of interest:
 #   Rules for Diamond or BLASTx reads against protein databases
 
-
 GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
 GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
 GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
@@ -13,25 +12,11 @@ GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_1.m8'), 
                      gene=GENES_DICT.keys(), sample=Samples.keys())
 
-TARGET_GENES_BLAST = expand(str(MAPPING_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_1.blastx'), 
-                     gene=GENES_DICT.keys(), sample=Samples.keys())
-
-TARGET_CARD = [expand(str(MAPPING_FP/'sbx_gene_clusters'/'card_20180628'/'{sample}_1.blastx'), gene=GENES_DICT.keys(), sample=Samples.keys()),
-               expand(str(ANNOTATION_FP/'sbx_gene_clusters'/'card_20180628'/'{sample}_contigs.blastx'), gene=GENES_DICT.keys(), sample=Samples.keys())]
-rule _all_card:
- input:
-  TARGET_CARD
-
-rule _all_genes:
+rule all_gene_family:
  input:
    TARGET_GENES
 
-rule _all_genes_blast:
- input:
-   TARGET_GENES_BLAST
-
 rule merge_pairs:
- message: "not now stay tuned"
  input:
   r1 = str(QC_FP/'decontam'/'{sample}_1.fastq.gz'),
   r2 = str(QC_FP/'decontam'/'{sample}_2.fastq.gz')
@@ -42,16 +27,11 @@ rule merge_pairs:
  shell:
   """
   vsearch \
-  	--fastq_mergepairs {input.r1} --reverse {input.r2} \
+    --fastq_mergepairs {input.r1} --reverse {input.r2} \
     --fastqout {output.reads} --threads {threads} \
     --fastq_allowmergestagger --fastq_maxdiffs 5 \
     --fastq_minovlen 10 --fastq_minmergelen 100
   """
-
-
-rule _test_diamond_db:
- input:
-  expand(str(GENES_DIR/'{gene}.fasta.{index}'), index=['dmnd'], gene=GENES_DICT.keys())
 
 rule build_diamond_db:
  input:
@@ -63,11 +43,6 @@ rule build_diamond_db:
   diamond makedb --in {input} -d {input} 
   """
 
-
-rule _test_blast_db:
- input:
-  expand(str(GENES_DIR/'{gene}.fasta.{index}'),index=['psq','pin','phr'], gene=GENES_DICT.keys())
-
 rule build_blast_db:
  input:
   lambda wildcards: GENES_DICT[wildcards.gene]
@@ -77,11 +52,6 @@ rule build_blast_db:
   """
   makeblastdb -in {input} -dbtype prot
   """
-
-
-rule _all_fa:
- input: 
-  expand(str(MAPPING_FP/'R1'/'{sample}_1.fasta'), sample=Samples.keys() )
 
 rule fq_2_fa:
  input:
@@ -125,29 +95,19 @@ rule blastx_reads:
   """
   blastx -query {input.read} -db {params.db} \
          -num_threads {threads} -evalue 1e-6 \
-         -max_target_seqs 10 \
+         -max_target_seqs 5000 \
          -out {output} \
          -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
   """
 
-
-rule _all_genes_contigs:
- input:
-  expand(str(ANNOTATION_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_contigs.blastx'),
-             gene=GENES_DICT.keys(), sample=Samples.keys())
-
-rule blastx_contigs:
- input:
-  contig = str(ASSEMBLY_FP/'contigs'/'{sample}-contigs.fa'),
-  db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['psq','pin','phr'])
+rule uniref50_download:
  output:
-  str(ANNOTATION_FP/'sbx_gene_clusters'/'{gene}'/'{sample}_contigs.blastx')
+  str(MAPPING_FP/'sbx_gene_family'/'databases'/'uniref50.fasta')
  params:
-  db=lambda wildcard: GENES_DICT[wildcard.gene]
- threads: Cfg['sbx_gene_clusters']['threads']
+  str(MAPPING_FP/'sbx_gene_family'/'databases')
  shell:
   """
-  blastx -query {input.contig} -out {output} -num_threads {threads}  \
-         -evalue 1e-6 -max_target_seqs 100 -db {input.db} \
-         -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
+  set +o pipefail
+  mkdir -p {params}
+  wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref50/uniref50.fasta.gz -P {params}
   """
