@@ -47,26 +47,30 @@ def filter_chunk(alignment_chunk, e_cutoff, aln_len_cutoff, mismatch_cutoff):
     return alignment_chunk
 
 def get_best_hit(alignment_chunk):
-    return alignment_chunk.pop(0)
+    if alignment_chunk:
+        return alignment_chunk.pop(0)
 
-def get_gene_function(alignment_chunk, db):
-    for aln in alignment_chunk:
-        aln.extend(db.get(aln[1]))
+def get_gene_function(aln, db):
+    if aln:
+        entries = db.get(aln[1])
+        if entries:
+            return [aln + entry for entry in entries]
 
 def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch):
-    print(in_fp)
-    print(out_fp)
-    print(db_annot_fp)
-    print(evalue)
-    print(alnLen)
-    print(mismatch)
-    
+
+    ## Organize the gene information    
     db_organized = OrderedDict()
     with open(db_annot_fp) as db_in:
         db = csv.DictReader(db_in, delimiter='\t')
         for row in db:
-            db_organized[row.get('proteinID')] = [row.get('geneID'), float(row.get('weight')), row.get('taxon')]
-    print(db_organized)
+            proteinID = row.get('proteinID')
+            entry = db_organized.get(proteinID)
+            if entry:
+                db_organized.get(proteinID).append([row.get('geneID'), float(row.get('weight')), row.get('taxon')])
+            else: # one protein can map to multiple classifications
+                db_organized[proteinID] = [[row.get('geneID'), float(row.get('weight')), row.get('taxon')]]
+    
+    ## Read in the alignment file to count
     counter_genes = Counter()
     if os.path.getsize(in_fp) > 0:    
         with open(in_fp) as in_file:
@@ -75,14 +79,14 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch):
         
             while aln_chunk:
                 current_chunk, aln_chunk = read_alignment(reader, aln_chunk)
-                #print(current_chunk)
                 current_chunk = filter_chunk(current_chunk, evalue, alnLen, mismatch)
-                #print(current_chunk)
+                current_chunk = get_best_hit(current_chunk) # is there a way to modify the current chunk and "pop" all but the first item?
+                current_chunk = get_gene_function(current_chunk, db_organized)
                 if current_chunk:
-                    get_gene_function(current_chunk, db_organized)
-                    filtered_chunk = get_best_hit(current_chunk) # is there a way to modify the current chunk and "pop" all but the first item?
-                    counter_genes[(filtered_chunk[14], filtered_chunk[16])] += filtered_chunk[15]
-    #print(counter_genes)
+                    for chunk in current_chunk:    
+                        counter_genes[(chunk[14], chunk[16])] += chunk[15]
+    
+    ## Write the counts to file
     with open(out_fp, 'w') as out_file:
         writer=csv.writer(out_file, delimiter='\t')
         writer.writerow(["geneID", "taxon", "count"])
