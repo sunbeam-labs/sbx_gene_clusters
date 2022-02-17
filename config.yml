@@ -1,3 +1,6 @@
 sbx_gene_clusters:
   threads: 8
   genes_fp: "{PROJECT_FP}"/mapping/sbx_gene_family/database
+  evalue: 1e-5
+  alnLen: 30
+  mismatch: 3
