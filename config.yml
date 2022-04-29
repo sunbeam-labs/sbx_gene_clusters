@@ -1,6 +1,6 @@
 sbx_gene_clusters:
   threads: 8
   genes_fp: "{PROJECT_FP}"/mapping/sbx_gene_family/database
-  evalue: 1e-5
+  evalue: 1e-5 #  this value is good for read lengths ~126 bp but should be bigger for shorter reads, e.g. 1e-3 for 75bp reads
   alnLen: 30
   mismatch: 3

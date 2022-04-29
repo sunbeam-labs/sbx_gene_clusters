@@ -5,16 +5,17 @@
 #   Rules for Diamond or BLASTx reads against protein databases
 
 import csv
+import gzip
 import os
 from collections import Counter, OrderedDict
 
-#GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
-#GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
-#GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
-#GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
+GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
+GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
+GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
+GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 
-#TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.txt'), 
-#                     gene=GENES_DICT.keys(), sample=Samples.keys())
+TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.txt'), 
+                     gene=GENES_DICT.keys(), sample=Samples.keys())
 
 rule all_gene_family:
     input:
@@ -72,8 +73,15 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch):
     
     ## Read in the alignment file to count
     counter_genes = Counter()
+    
+    # unzip if necessary
+    if os.path.splitext(in_fp)[1] == ".gz":
+        open_fxn = lambda in_fp: gzip.open(in_fp, mode="rt")
+    else:
+        open_fxn = lambda in_fp: open(in_fp)
+        
     if os.path.getsize(in_fp) > 0:    
-        with open(in_fp) as in_file:
+        with open_fxn(in_fp) as in_file:
             reader = csv.reader(in_file, delimiter='\t') # initialize the csv reader
             aln_chunk = [next(reader)] #initialize the seed chunk
         
@@ -103,6 +111,8 @@ rule gene_hits:
         evalue = float(Cfg['sbx_gene_clusters']['evalue']),
         alnLen = Cfg['sbx_gene_clusters']['alnLen'],
         mismatch = Cfg['sbx_gene_clusters']['mismatch']
+    resources:
+        mem_mb=8192
     run:
         write_gene_hits(input.aln_fp, output[0], input.db_annot_fp[0], params.evalue, params.alnLen, params.mismatch)
 
@@ -155,19 +165,25 @@ rule fq_2_fa:
 
 rule diamond_reads:
     input:
-        read = str(MAPPING_FP/'R1'/'{sample}_1.fasta'),
+        # input can be fastq.gz
+        read = str(QC_FP/'decontam'/'{sample}_1.fastq.gz'),
         db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['dmnd'])
     output:
-        str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8')
+        str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8.gz')
     threads:
         Cfg['sbx_gene_clusters']['threads']
+    resources:
+        mem_mb=16384
+    params:
+        evalue=Cfg['sbx_gene_clusters']['evalue']
     shell:
         """
         diamond blastx \
             --db {input.db} --query {input.read} \
-            --threads {threads} --evalue 1e-6 \
+            --threads {threads} --evalue {params.evalue} \
             --max-target-seqs 0 \
             --out {output} \
+            --compress 1 \
             --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore
         """
 

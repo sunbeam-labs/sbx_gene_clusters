@@ -1,6 +1,6 @@
 # sbx_gene_family
 
-Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. 
+This extension can be used to perform functional mapping, i.e. mapping metagenomic reads to proteins. The database to map against could be [UniRef50](https://www.uniprot.org/downloads), all prokaryotic proteins from [KEGG](https://www.kegg.jp/kegg/download/), or more targeted [databases](https://github.com/zhaoc1/sunbeam_databases.git), e.g. bai operon or butyrate producing genes.
 
 Take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. First download the uniref50.fasta into your current `sunbeam_output/mapping/sbx_gene_family/databases/`.
 
@@ -34,7 +34,7 @@ Take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. F
   
  4. Run time
 
- - Use diamond
+By default, mapping uses DIAMOND, but this extension also supports using BLAST.
  
   ```bash
   sunbeam run -- --configfile sunbeam_config.yml all_gene_family
