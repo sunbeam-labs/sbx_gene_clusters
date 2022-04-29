@@ -103,6 +103,8 @@ rule gene_hits:
         evalue = float(Cfg['sbx_gene_clusters']['evalue']),
         alnLen = Cfg['sbx_gene_clusters']['alnLen'],
         mismatch = Cfg['sbx_gene_clusters']['mismatch']
+    resources:
+        mem_mb=8192
     run:
         write_gene_hits(input.aln_fp, output[0], input.db_annot_fp[0], params.evalue, params.alnLen, params.mismatch)
 
@@ -162,6 +164,8 @@ rule diamond_reads:
         str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8')
     threads:
         Cfg['sbx_gene_clusters']['threads']
+    resources:
+        mem_mb=16384
     shell:
         """
         diamond blastx \
