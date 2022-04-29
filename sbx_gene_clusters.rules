@@ -174,11 +174,13 @@ rule diamond_reads:
         Cfg['sbx_gene_clusters']['threads']
     resources:
         mem_mb=16384
+    params:
+        evalue=Cfg['sbx_gene_clusters']['evalue']
     shell:
         """
         diamond blastx \
             --db {input.db} --query {input.read} \
-            --threads {threads} --evalue 1e-6 \
+            --threads {threads} --evalue {params.evalue} \
             --max-target-seqs 0 \
             --out {output} \
             --compress 1 \
