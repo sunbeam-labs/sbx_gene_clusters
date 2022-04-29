@@ -5,6 +5,7 @@
 #   Rules for Diamond or BLASTx reads against protein databases
 
 import csv
+import gzip
 import os
 from collections import Counter, OrderedDict
 
@@ -72,8 +73,15 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch):
     
     ## Read in the alignment file to count
     counter_genes = Counter()
+    
+    # unzip if necessary
+    if os.path.splitext(in_fp)[1] == ".gz":
+        open_fxn = lambda in_fp: gzip.open(in_fp, mode="rt")
+    else:
+        open_fxn = lambda in_fp: open(in_fp)
+        
     if os.path.getsize(in_fp) > 0:    
-        with open(in_fp) as in_file:
+        with open_fxn(in_fp) as in_file:
             reader = csv.reader(in_file, delimiter='\t') # initialize the csv reader
             aln_chunk = [next(reader)] #initialize the seed chunk
         
@@ -161,7 +169,7 @@ rule diamond_reads:
         read = str(QC_FP/'decontam'/'{sample}_1.fastq.gz'),
         db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['dmnd'])
     output:
-        str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8')
+        str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8.gz')
     threads:
         Cfg['sbx_gene_clusters']['threads']
     resources:
@@ -173,6 +181,7 @@ rule diamond_reads:
             --threads {threads} --evalue 1e-6 \
             --max-target-seqs 0 \
             --out {output} \
+            --compress 1 \
             --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore
         """
 
