@@ -8,13 +8,13 @@ import csv
 import os
 from collections import Counter, OrderedDict
 
-#GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
-#GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
-#GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
-#GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
+GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
+GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
+GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
+GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 
-#TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.txt'), 
-#                     gene=GENES_DICT.keys(), sample=Samples.keys())
+TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.txt'), 
+                     gene=GENES_DICT.keys(), sample=Samples.keys())
 
 rule all_gene_family:
     input:
