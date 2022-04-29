@@ -155,7 +155,8 @@ rule fq_2_fa:
 
 rule diamond_reads:
     input:
-        read = str(MAPPING_FP/'R1'/'{sample}_1.fasta'),
+        # input can be fastq.gz
+        read = str(QC_FP/'decontam'/'{sample}_1.fastq.gz'),
         db = expand(str(GENES_DIR/'{{gene}}.fasta.{index}'), index=['dmnd'])
     output:
         str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8')
