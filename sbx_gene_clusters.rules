@@ -114,6 +114,8 @@ rule merge_pairs:
         r1 = str(MAPPING_FP/'merged'/'{sample}.fastq')
     threads:
         Cfg['blast']['threads']
+    conda:
+        "gene_clusters_env.yaml"
     shell:
         """
         vsearch \
@@ -128,6 +130,8 @@ rule build_diamond_db:
         lambda wildcards: GENES_DICT[wildcards.gene]
     output:
         expand(str(GENES_DIR/'{{gene}}.fasta.{index}'),index=['dmnd'])
+    conda:
+        "gene_clusters_env.yaml"
     shell:
         """
         diamond makedb --in {input} -d {input} 
@@ -138,6 +142,8 @@ rule build_blast_db:
         lambda wildcards: GENES_DICT[wildcards.gene]
     output:
         expand(str(GENES_DIR/'{{gene}}.fasta.{index}'),index=['psq','pin','phr'])
+    conda:
+        "gene_clusters_env.yaml"
     shell:
         """
         makeblastdb -in {input} -dbtype prot
@@ -148,6 +154,8 @@ rule fq_2_fa:
         str(QC_FP/'decontam'/'{sample}_1.fastq.gz')
     output:
         str(MAPPING_FP/'R1'/'{sample}_1.fasta')
+    conda:
+        "gene_clusters_env.yaml"
     shell:
         """
         seqtk seq -a < <(gzip -cd {input}) > {output}
@@ -161,6 +169,8 @@ rule diamond_reads:
         str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.m8')
     threads:
         Cfg['sbx_gene_clusters']['threads']
+    conda:
+        "gene_clusters_env.yaml"
     shell:
         """
         diamond blastx \
@@ -181,6 +191,8 @@ rule blastx_reads:
         db=lambda wildcard: GENES_DICT[wildcard.gene]
     threads:
         Cfg['sbx_gene_clusters']['threads']
+    conda:
+        "gene_clusters_env.yaml"
     shell:
         """
         blastx -query {input.read} -db {params.db} \
