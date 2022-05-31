@@ -2,5 +2,6 @@ name: gene_clusters
 channels:
   - bioconda
 dependencies:
-  - seqtk
   - diamond
+  - seqtk
+  - vsearch
