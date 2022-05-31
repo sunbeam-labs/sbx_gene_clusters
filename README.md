@@ -1,4 +1,4 @@
-# sbx_gene_family
+# sbx_gene_clusters
 
 Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. 
 
