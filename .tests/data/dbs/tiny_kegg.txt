@@ -1,0 +1,4 @@
+proteinID   geneID  taxon   weight
+eco:b0001   K08278  eco 1.0
+eco:b0002   K12524  eco 1.0
+eco:b0003   K00872  eco 1.0

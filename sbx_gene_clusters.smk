@@ -8,13 +8,13 @@ import csv
 import os
 from collections import Counter, OrderedDict
 
-#GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
-#GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
-#GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
-#GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
+GENES_DIR = Cfg['sbx_gene_clusters']['genes_fp']
+GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob('*.fasta')]
+GENES_VAL = [str(GENES_DIR) + '/' + g+'.fasta' for g in GENES_KEY]
+GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 
-#TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.txt'), 
-#                     gene=GENES_DICT.keys(), sample=Samples.keys())
+TARGET_GENES = expand(str(MAPPING_FP/'sbx_gene_family'/'{gene}'/'{sample}_1.txt'), 
+                     gene=GENES_DICT.keys(), sample=Samples.keys())
 
 rule all_gene_family:
     input:
@@ -113,9 +113,9 @@ rule merge_pairs:
     output:
         r1 = str(MAPPING_FP/'merged'/'{sample}.fastq')
     threads:
-        Cfg['blast']['threads']
+        Cfg['sbx_gene_clusters']['threads']
     conda:
-        "gene_clusters_env.yaml"
+        "sbx_gene_clusters_env.yml"
     shell:
         """
         vsearch \
@@ -125,13 +125,13 @@ rule merge_pairs:
         --fastq_minovlen 10 --fastq_minmergelen 100
         """
 
-rule build_diamond_db:
+rule build_gene_clusters_diamond_db:
     input:
         lambda wildcards: GENES_DICT[wildcards.gene]
     output:
         expand(str(GENES_DIR/'{{gene}}.fasta.{index}'),index=['dmnd'])
     conda:
-        "gene_clusters_env.yaml"
+        "sbx_gene_clusters_env.yml"
     shell:
         """
         diamond makedb --in {input} -d {input} 
@@ -143,7 +143,7 @@ rule build_blast_db:
     output:
         expand(str(GENES_DIR/'{{gene}}.fasta.{index}'),index=['psq','pin','phr'])
     conda:
-        "gene_clusters_env.yaml"
+        "sbx_gene_clusters_env.yml"
     shell:
         """
         makeblastdb -in {input} -dbtype prot
@@ -155,7 +155,7 @@ rule fq_2_fa:
     output:
         str(MAPPING_FP/'R1'/'{sample}_1.fasta')
     conda:
-        "gene_clusters_env.yaml"
+        "sbx_gene_clusters_env.yml"
     shell:
         """
         seqtk seq -a < <(gzip -cd {input}) > {output}
@@ -170,7 +170,7 @@ rule diamond_reads:
     threads:
         Cfg['sbx_gene_clusters']['threads']
     conda:
-        "gene_clusters_env.yaml"
+        "sbx_gene_clusters_env.yml"
     shell:
         """
         diamond blastx \
@@ -192,7 +192,7 @@ rule blastx_reads:
     threads:
         Cfg['sbx_gene_clusters']['threads']
     conda:
-        "gene_clusters_env.yaml"
+        "sbx_gene_clusters_env.yml"
     shell:
         """
         blastx -query {input.read} -db {params.db} \

@@ -1,4 +1,10 @@
+<img src="https://github.com/sunbeam-labs/sunbeam/blob/stable/docs/images/sunbeam_logo.gif" width=120, height=120 align="left" />
+
 # sbx_gene_clusters
+
+<!-- Badges start -->
+
+<!-- Badges end -->
 
 Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. 
 
