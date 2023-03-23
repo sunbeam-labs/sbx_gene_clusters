@@ -95,9 +95,9 @@ rule fq_2_fa:
     output:
         str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
     benchmark:
-        BENCHMARK_FP / "fq_2_fa.tsv"
+        BENCHMARK_FP / "fq_2_fa_{sample}.tsv"
     log:
-        LOG_FP / "fq_2_fa.log",
+        LOG_FP / "fq_2_fa_{sample}.log",
     conda:
         "sbx_gene_clusters_env.yml"
     shell:

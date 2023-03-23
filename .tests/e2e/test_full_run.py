@@ -12,6 +12,7 @@ def setup():
 
     reads_fp = os.path.abspath(".tests/data/reads/")
     hosts_fp = os.path.abspath(".tests/data/hosts/")
+    db_fp = os.path.abspath(".tests/data/dbs/")
 
     project_dir = os.path.join(temp_dir, "project/")
 
@@ -20,6 +21,19 @@ def setup():
     config_fp = os.path.join(project_dir, "sunbeam_config.yml")
 
     config_str = f"qc: {{host_fp: {hosts_fp}}}"
+    sp.check_output(
+        [
+            "sunbeam",
+            "config",
+            "modify",
+            "-i",
+            "-s",
+            f"{config_str}",
+            f"{config_fp}",
+        ]
+    )
+
+    config_str = f"sbx_gene_clusters: {{genes_fp: {db_fp}}}"
     sp.check_output(
         [
             "sunbeam",
@@ -78,4 +92,7 @@ def run_sunbeam(setup):
 def test_full_run_assembly(run_sunbeam):
     output_fp, benchmarks_fp = run_sunbeam
 
-    assert False
+    kegg_results_fp = os.path.join(output_fp, "mapping/sbx_gene_family/tiny_kegg/from_kegg_1.txt")
+
+    assert os.path.exists(kegg_results_fp)
+    assert os.stat(kegg_results_fp).st_size > 0
