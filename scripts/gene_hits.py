@@ -48,12 +48,13 @@ def get_gene_function(aln, db):
             return [aln + entry for entry in entries]
 
 
-def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch):
+def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     ## Organize the gene information
     db_organized = OrderedDict()
     with open(db_annot_fp) as db_in:
-        db = csv.DictReader(db_in, delimiter="\t")
+        db = csv.DictReader(db_in, dialect="excel-tab")
         for row in db:
+            log.write(f"{str(row)}\n")
             proteinID = row.get("proteinID")
             entry = db_organized.get(proteinID)
             if entry:
@@ -98,4 +99,5 @@ with open(snakemake.log[0], "w") as log:
             snakemake.params.evalue,
             snakemake.params.alnLen,
             snakemake.params.mismatch,
+            log
         )

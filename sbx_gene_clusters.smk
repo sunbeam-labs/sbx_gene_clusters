@@ -17,6 +17,7 @@ GENES_DIR = Cfg["sbx_gene_clusters"]["genes_fp"]
 GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob("*.fasta")]
 GENES_VAL = [str(GENES_DIR) + "/" + g + ".fasta" for g in GENES_KEY]
 GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
+print(f"sbx_gene_clusters::INFO Found these genes dbs: {str(GENES_DICT)}")
 
 TARGET_GENES = expand(
     str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
@@ -28,24 +29,6 @@ TARGET_GENES = expand(
 rule all_gene_family:
     input:
         TARGET_GENES,
-
-
-rule gene_hits:
-    input:
-        aln_fp=str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
-        db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["txt"]),
-    output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
-    benchmark:
-        BENCHMARK_FP / "gene_hits_{gene}_{sample}.tsv"
-    log:
-        LOG_FP / "gene_hits_{gene}_{sample}.log",
-    params:
-        evalue=float(Cfg["sbx_gene_clusters"]["evalue"]),
-        alnLen=Cfg["sbx_gene_clusters"]["alnLen"],
-        mismatch=Cfg["sbx_gene_clusters"]["mismatch"],
-    script:
-        "scripts/gene_hits.py"
 
 
 rule merge_pairs:
@@ -124,6 +107,24 @@ rule diamond_reads:
             --out {output} \
             --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore
         """
+
+
+rule gene_hits:
+    input:
+        aln_fp=str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
+        db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["tsv"]),
+    output:
+        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
+    benchmark:
+        BENCHMARK_FP / "gene_hits_{gene}_{sample}.tsv"
+    log:
+        LOG_FP / "gene_hits_{gene}_{sample}.log",
+    params:
+        evalue=float(Cfg["sbx_gene_clusters"]["evalue"]),
+        alnLen=Cfg["sbx_gene_clusters"]["alnLen"],
+        mismatch=Cfg["sbx_gene_clusters"]["mismatch"],
+    script:
+        "scripts/gene_hits.py"
 
 
 rule blastx_reads:
