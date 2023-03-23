@@ -2,6 +2,7 @@ import csv
 import os
 from collections import Counter, OrderedDict
 
+
 def read_alignment(reader, aln_chunk):
     # Read a chunk of alignment for a single query.
     for line in reader:
@@ -91,13 +92,14 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
         for key, value in counter_genes.items():
             writer.writerow(list(key) + [value])
 
+
 with open(snakemake.log[0], "w") as log:
     write_gene_hits(
-            snakemake.input.aln_fp,
-            snakemake.output[0],
-            snakemake.input.db_annot_fp[0],
-            snakemake.params.evalue,
-            snakemake.params.alnLen,
-            snakemake.params.mismatch,
-            log
-        )
+        snakemake.input.aln_fp,
+        snakemake.output[0],
+        snakemake.input.db_annot_fp[0],
+        snakemake.params.evalue,
+        snakemake.params.alnLen,
+        snakemake.params.mismatch,
+        log,
+    )

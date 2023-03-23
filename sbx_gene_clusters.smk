@@ -37,6 +37,10 @@ rule merge_pairs:
         r2=str(QC_FP / "decontam" / "{sample}_2.fastq.gz"),
     output:
         r1=str(MAPPING_FP / "merged" / "{sample}.fastq"),
+    benchmark:
+        BENCHMARK_FP / "merge_pairs_{sample}.tsv"
+    log:
+        LOG_FP / "merge_pairs_{sample}.log",
     threads: Cfg["sbx_gene_clusters"]["threads"]
     conda:
         "sbx_gene_clusters_env.yml"
@@ -46,7 +50,8 @@ rule merge_pairs:
         --fastq_mergepairs {input.r1} --reverse {input.r2} \
         --fastqout {output.reads} --threads {threads} \
         --fastq_allowmergestagger --fastq_maxdiffs 5 \
-        --fastq_minovlen 10 --fastq_minmergelen 100
+        --fastq_minovlen 10 --fastq_minmergelen 100 \
+        2>&1 | tee {log}
         """
 
 
@@ -55,24 +60,32 @@ rule build_gene_clusters_diamond_db:
         lambda wildcards: GENES_DICT[wildcards.gene],
     output:
         expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["dmnd"]),
+    benchmark:
+        BENCHMARK_FP / "build_gene_clusters_diamond_db_{gene}.tsv"
+    log:
+        LOG_FP / "build_gene_clusters_diamond_db_{gene}.log",
     conda:
         "sbx_gene_clusters_env.yml"
     shell:
         """
-        diamond makedb --in {input} -d {input} 
+        diamond makedb --in {input} -d {input} 2>&1 | tee {log}
         """
 
 
-rule build_blast_db:
+rule build_gene_clusters_blast_db:
     input:
         lambda wildcards: GENES_DICT[wildcards.gene],
     output:
         expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["psq", "pin", "phr"]),
+    benchmark:
+        BENCHMARK_FP / "build_gene_clusters_blast_db_{gene}.tsv"
+    log:
+        LOG_FP / "build_gene_clusters_blast_db_{gene}.log",
     conda:
         "sbx_gene_clusters_env.yml"
     shell:
         """
-        makeblastdb -in {input} -dbtype prot
+        makeblastdb -in {input} -dbtype prot 2>&1 | tee {log}
         """
 
 
@@ -81,11 +94,15 @@ rule fq_2_fa:
         str(QC_FP / "decontam" / "{sample}_1.fastq.gz"),
     output:
         str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
+    benchmark:
+        BENCHMARK_FP / "fq_2_fa.tsv"
+    log:
+        LOG_FP / "fq_2_fa.log",
     conda:
         "sbx_gene_clusters_env.yml"
     shell:
         """
-        seqtk seq -a < <(gzip -cd {input}) > {output}
+        seqtk seq -a < <(gzip -cd {input}) > {output} 2> {log}
         """
 
 
@@ -95,6 +112,10 @@ rule diamond_reads:
         db=expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["dmnd"]),
     output:
         str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
+    benchmark:
+        BENCHMARK_FP / "diamond_reads_{gene}_{sample}.tsv"
+    log:
+        LOG_FP / "diamond_reads_{gene}_{sample}.log",
     threads: Cfg["sbx_gene_clusters"]["threads"]
     conda:
         "sbx_gene_clusters_env.yml"
@@ -105,7 +126,8 @@ rule diamond_reads:
             --threads {threads} --evalue 1e-6 \
             --max-target-seqs 0 \
             --out {output} \
-            --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore
+            --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore \
+            2>&1 | tee {log}
         """
 
 
@@ -135,6 +157,10 @@ rule blastx_reads:
         ),
     output:
         str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.blastx"),
+    benchmark:
+        BENCHMARK_FP / "blastx_reads_{gene}_{sample}.tsv"
+    log:
+        LOG_FP / "blastx_reads_{gene}_{sample}.log",
     params:
         db=lambda wildcard: GENES_DICT[wildcard.gene],
     threads: Cfg["sbx_gene_clusters"]["threads"]
@@ -146,7 +172,8 @@ rule blastx_reads:
                -num_threads {threads} -evalue 1e-6 \
                -max_target_seqs 5000 \
                -out {output} \
-               -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore"
+               -outfmt "6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore" \
+                2>&1 | tee {log}
         """
 
 
