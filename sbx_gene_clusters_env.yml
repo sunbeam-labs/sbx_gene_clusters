@@ -1,4 +1,4 @@
-name: gene_clusters
+name: sbx_gene_clusters
 channels:
   - bioconda
 dependencies:
