@@ -20,7 +20,7 @@ GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 print(f"sbx_gene_clusters::INFO Found these genes dbs: {str(GENES_DICT)}")
 
 TARGET_GENES = expand(
-    str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
+    str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
     gene=GENES_DICT.keys(),
     sample=Samples.keys(),
 )
@@ -111,7 +111,7 @@ rule diamond_reads:
         read=str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
         db=expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["dmnd"]),
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
     benchmark:
         BENCHMARK_FP / "diamond_reads_{gene}_{sample}.tsv"
     log:
@@ -133,10 +133,10 @@ rule diamond_reads:
 
 rule gene_hits:
     input:
-        aln_fp=str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
+        aln_fp=str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
         db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["tsv"]),
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
     benchmark:
         BENCHMARK_FP / "gene_hits_{gene}_{sample}.tsv"
     log:
@@ -156,7 +156,7 @@ rule blastx_reads:
             str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["psq", "pin", "phr"]
         ),
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.blastx"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.blastx"),
     benchmark:
         BENCHMARK_FP / "blastx_reads_{gene}_{sample}.tsv"
     log:
@@ -179,9 +179,9 @@ rule blastx_reads:
 
 rule uniref50_download:
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "databases" / "uniref50.fasta"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "databases" / "uniref50.fasta"),
     params:
-        str(MAPPING_FP / "sbx_gene_family" / "databases"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "databases"),
     shell:
         """
         set +o pipefail
