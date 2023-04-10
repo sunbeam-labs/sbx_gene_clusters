@@ -92,6 +92,9 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
         for key, value in counter_genes.items():
             writer.writerow(list(key) + [value])
 
+    ## Remove the bulky .m8 file
+    os.remove(in_fp)
+
 
 with open(snakemake.log[0], "w") as log:
     write_gene_hits(
