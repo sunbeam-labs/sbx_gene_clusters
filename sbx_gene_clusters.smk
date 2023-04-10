@@ -26,7 +26,7 @@ TARGET_GENES = expand(
 )
 
 
-rule all_gene_family:
+rule all_gene_clusters:
     input:
         TARGET_GENES,
 
