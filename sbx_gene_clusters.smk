@@ -134,7 +134,7 @@ rule diamond_reads:
 rule gene_hits:
     input:
         aln_fp=str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
-        db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["tsv"]),
+        db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["txt"]),
     output:
         str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
     benchmark:
