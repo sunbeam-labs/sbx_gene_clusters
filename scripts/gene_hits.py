@@ -94,7 +94,7 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
 
     ## Write total number of genes to log file
     ## TODO: have some kind of summary statistics like total filtered, total found, etc.
-    log.write(f"Wrote {str(length(counter_genes)} genes.\n")
+    log.write(f"Wrote {str(len(counter_genes))} genes.\n")
 
     ## Remove the bulky .m8 file
     os.remove(in_fp)

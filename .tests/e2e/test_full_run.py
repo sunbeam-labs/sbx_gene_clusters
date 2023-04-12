@@ -68,7 +68,7 @@ def run_sunbeam(setup):
                 "--profile",
                 project_dir,
                 "--target_list",
-                "all_gene_family",
+                "all_gene_clusters",
                 "--directory",
                 temp_dir,
             ]
@@ -89,7 +89,7 @@ def run_sunbeam(setup):
     yield output_fp, benchmarks_fp
 
 
-def test_full_run_assembly(run_sunbeam):
+def test_full_run(run_sunbeam):
     output_fp, benchmarks_fp = run_sunbeam
 
     kegg_results_fp = os.path.join(
