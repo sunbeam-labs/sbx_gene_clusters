@@ -96,10 +96,6 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     ## TODO: have some kind of summary statistics like total filtered, total found, etc.
     log.write(f"Wrote {str(len(counter_genes))} genes.\n")
 
-    ## Remove the bulky .m8 file
-    os.remove(in_fp)
-
-
 with open(snakemake.log[0], "w") as log:
     write_gene_hits(
         snakemake.input.aln_fp,
