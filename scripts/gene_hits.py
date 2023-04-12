@@ -55,7 +55,7 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     with open(db_annot_fp) as db_in:
         db = csv.DictReader(db_in, dialect="excel-tab")
         for row in db:
-            log.write(f"{str(row)}\n")
+#            log.write(f"{str(row)}\n") # this writes all the genes in the db which is tooooo much logging
             proteinID = row.get("proteinID")
             entry = db_organized.get(proteinID)
             if entry:
@@ -91,6 +91,10 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
         writer.writerow(["geneID", "taxon", "count"])
         for key, value in counter_genes.items():
             writer.writerow(list(key) + [value])
+
+    ## Write total number of genes to log file
+    ## TODO: have some kind of summary statistics like total filtered, total found, etc.
+    log.write(f"Wrote {str(length(counter_genes)} genes.\n")
 
     ## Remove the bulky .m8 file
     os.remove(in_fp)
