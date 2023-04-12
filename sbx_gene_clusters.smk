@@ -132,6 +132,7 @@ rule diamond_reads:
 
 
 rule gene_hits:
+    priority: 100 # setting higher so it slurps up m8 files before they take up too much space
     input:
         aln_fp=str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
         db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["txt"]),
