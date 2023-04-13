@@ -135,7 +135,8 @@ with open(snakemake.log.diamond_log, "w") as log:
                 "send",
                 "evalue",
                 "bitscore",
-            ]
+            ],
+            stderr=sp.STDOUT,
         )
     except sp.CalledProcessError as e:
         log.write(e.output.decode())
