@@ -93,7 +93,7 @@ def test_full_run(run_sunbeam):
     output_fp, benchmarks_fp = run_sunbeam
 
     kegg_results_fp = os.path.join(
-        output_fp, "mapping/sbx_gene_family/tiny_kegg/from_kegg_1.txt"
+        output_fp, "mapping/sbx_gene_clusters/tiny_kegg/from_kegg_1.txt"
     )
 
     assert os.path.exists(kegg_results_fp)
