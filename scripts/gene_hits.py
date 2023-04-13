@@ -1,6 +1,7 @@
 import csv
 import os
 import subprocess as sp
+import sys
 from collections import Counter, OrderedDict
 
 
@@ -101,40 +102,45 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     os.remove(in_fp)
 
 with open(snakemake.log.diamond_log, "w") as log:
-    sp.check_output(
-        [
-            "diamond",
-            "blastx",
-            "--db",
-            f"{snakemake.input.db}",
-            "--query",
-            f"{snakemake.input.read}",
-            "--threads",
-            f"{snakemake.threads}",
-            "--evalue",
-            "1e-6",
-            "--max-target-seqs",
-            "0",
-            "--out",
-            f"{snakemake.params.m8}",
-            "--outfmt",
-            "6",
-            "qseqid",
-            "sseqid",
-            "pident",
-            "qlen",
-            "slen",
-            "length",
-            "mismatch",
-            "gapopen",
-            "qstart",
-            "qend",
-            "sstart",
-            "send",
-            "evalue",
-            "bitscore",
-        ]
-    )
+    try:
+        ret = sp.check_output(
+            [
+                "diamond",
+                "blastx",
+                "--db",
+                f"{snakemake.input.db}",
+                "--query",
+                f"{snakemake.input.read}",
+                "--threads",
+                f"{snakemake.threads}",
+                "--evalue",
+                "1e-6",
+                "--max-target-seqs",
+                "0",
+                "--out",
+                f"{snakemake.params.m8}",
+                "--outfmt",
+                "6",
+                "qseqid",
+                "sseqid",
+                "pident",
+                "qlen",
+                "slen",
+                "length",
+                "mismatch",
+                "gapopen",
+                "qstart",
+                "qend",
+                "sstart",
+                "send",
+                "evalue",
+                "bitscore",
+            ]
+        )
+    except sp.CalledProcessError as e:
+        log.write(e.output.decode())
+        sys.exit(e.returncode)
+    log.write(ret.decode())
 
 with open(snakemake.log.script_log, "w") as log:
     write_gene_hits(
