@@ -111,7 +111,7 @@ rule diamond_reads:
         read=str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
         db=expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["dmnd"]),
     output:
-        temp(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"), 
+        temp(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"), 
     benchmark:
         BENCHMARK_FP / "diamond_reads_{gene}_{sample}.tsv"
     log:
