@@ -68,7 +68,7 @@ def run_sunbeam(setup):
                 "--profile",
                 project_dir,
                 "--target_list",
-                "all_gene_clusters",
+                "all_gene_family",
                 "--directory",
                 temp_dir,
             ]
