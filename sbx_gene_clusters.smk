@@ -105,47 +105,26 @@ rule fq_2_fa:
         seqtk seq -a < <(gzip -cd {input}) > {output} 2> {log}
         """
 
-
-rule diamond_reads:
+rule gene_hits:
     input:
         read=str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
         db=expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["dmnd"]),
-    output:
-        temp(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"), 
-    benchmark:
-        BENCHMARK_FP / "diamond_reads_{gene}_{sample}.tsv"
-    log:
-        LOG_FP / "diamond_reads_{gene}_{sample}.log",
-    threads: Cfg["sbx_gene_clusters"]["threads"]
-    conda:
-        "sbx_gene_clusters_env.yml"
-    shell:
-        """
-        diamond blastx \
-            --db {input.db} --query {input.read} \
-            --threads {threads} --evalue 1e-6 \
-            --max-target-seqs 0 \
-            --out {output} \
-            --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore \
-            2>&1 | tee {log}
-        """
-
-
-rule gene_hits:
-    priority: 100 # setting higher so it slurps up m8 files before they take up too much space
-    input:
-        aln_fp=str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
         db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["txt"]),
     output:
         str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
     benchmark:
         BENCHMARK_FP / "gene_hits_{gene}_{sample}.tsv"
     log:
-        LOG_FP / "gene_hits_{gene}_{sample}.log",
+        diamond_log=LOG_FP / "gene_hits_diamond_{gene}_{sample}.log",
+        script_log=LOG_FP / "gene_hits_{gene}_{sample}.log",
     params:
         evalue=float(Cfg["sbx_gene_clusters"]["evalue"]),
         alnLen=Cfg["sbx_gene_clusters"]["alnLen"],
         mismatch=Cfg["sbx_gene_clusters"]["mismatch"],
+        m8=str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
+    threads: Cfg["sbx_gene_clusters"]["threads"]
+    conda:
+        "sbx_gene_clusters_env.yml"
     script:
         "scripts/gene_hits.py"
 

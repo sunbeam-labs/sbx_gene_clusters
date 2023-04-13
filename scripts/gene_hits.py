@@ -1,5 +1,6 @@
 import csv
 import os
+import subprocess as sp
 from collections import Counter, OrderedDict
 
 
@@ -96,9 +97,48 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     ## TODO: have some kind of summary statistics like total filtered, total found, etc.
     log.write(f"Wrote {str(len(counter_genes))} genes.\n")
 
-with open(snakemake.log[0], "w") as log:
+    ## Remove the bulky .m8 file
+    os.remove(in_fp)
+
+with open(snakemake.log.diamond_log, "w") as log:
+    sp.check_output(
+        [
+            "diamond",
+            "blastx",
+            "--db",
+            f"{snakemake.input.db}",
+            "--query",
+            f"{snakemake.input.read}",
+            "--threads",
+            f"{snakemake.threads}",
+            "--evalue",
+            "1e-6",
+            "--max-target-seqs",
+            "0",
+            "--out",
+            f"{snakemake.params.m8}",
+            "--outfmt",
+            "6",
+            "qseqid",
+            "sseqid",
+            "pident",
+            "qlen",
+            "slen",
+            "length",
+            "mismatch",
+            "gapopen",
+            "qstart",
+            "qend",
+            "sstart",
+            "send",
+            "evalue",
+            "bitscore",
+        ]
+    )
+
+with open(snakemake.log.script_log, "w") as log:
     write_gene_hits(
-        snakemake.input.aln_fp,
+        snakemake.params.m8,
         snakemake.output[0],
         snakemake.input.db_annot_fp[0],
         snakemake.params.evalue,
