@@ -105,6 +105,7 @@ rule fq_2_fa:
         seqtk seq -a < <(gzip -cd {input}) > {output} 2> {log}
         """
 
+
 rule gene_hits:
     input:
         read=str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
