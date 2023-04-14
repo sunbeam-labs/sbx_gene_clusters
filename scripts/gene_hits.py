@@ -1,5 +1,7 @@
 import csv
 import os
+import subprocess as sp
+import sys
 from collections import Counter, OrderedDict
 
 
@@ -55,7 +57,7 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     with open(db_annot_fp) as db_in:
         db = csv.DictReader(db_in, dialect="excel-tab")
         for row in db:
-            log.write(f"{str(row)}\n")
+#            log.write(f"{str(row)}\n") # this writes all the genes in the db which is tooooo much logging
             proteinID = row.get("proteinID")
             entry = db_organized.get(proteinID)
             if entry:
@@ -92,10 +94,58 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
         for key, value in counter_genes.items():
             writer.writerow(list(key) + [value])
 
+    ## Write total number of genes to log file
+    ## TODO: have some kind of summary statistics like total filtered, total found, etc.
+    log.write(f"Wrote {str(len(counter_genes))} genes.\n")
 
-with open(snakemake.log[0], "w") as log:
+    ## Remove the bulky .m8 file
+    os.remove(in_fp)
+
+with open(snakemake.log.diamond_log, "w") as log:
+    try:
+        ret = sp.check_output(
+            [
+                "diamond",
+                "blastx",
+                "--db",
+                f"{snakemake.input.db}",
+                "--query",
+                f"{snakemake.input.read}",
+                "--threads",
+                f"{snakemake.threads}",
+                "--evalue",
+                "1e-6",
+                "--max-target-seqs",
+                "0",
+                "--out",
+                f"{snakemake.params.m8}",
+                "--outfmt",
+                "6",
+                "qseqid",
+                "sseqid",
+                "pident",
+                "qlen",
+                "slen",
+                "length",
+                "mismatch",
+                "gapopen",
+                "qstart",
+                "qend",
+                "sstart",
+                "send",
+                "evalue",
+                "bitscore",
+            ],
+            stderr=sp.STDOUT,
+        )
+    except sp.CalledProcessError as e:
+        log.write(e.output.decode())
+        sys.exit(e.returncode)
+    log.write(ret.decode())
+
+with open(snakemake.log.script_log, "w") as log:
     write_gene_hits(
-        snakemake.input.aln_fp,
+        snakemake.params.m8,
         snakemake.output[0],
         snakemake.input.db_annot_fp[0],
         snakemake.params.evalue,

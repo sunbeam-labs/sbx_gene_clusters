@@ -68,7 +68,7 @@ def run_sunbeam(setup):
                 "--profile",
                 project_dir,
                 "--target_list",
-                "all_gene_family",
+                "all_gene_clusters",
                 "--directory",
                 temp_dir,
             ]
@@ -89,11 +89,11 @@ def run_sunbeam(setup):
     yield output_fp, benchmarks_fp
 
 
-def test_full_run_assembly(run_sunbeam):
+def test_full_run(run_sunbeam):
     output_fp, benchmarks_fp = run_sunbeam
 
     kegg_results_fp = os.path.join(
-        output_fp, "mapping/sbx_gene_family/tiny_kegg/from_kegg_1.txt"
+        output_fp, "mapping/sbx_gene_clusters/tiny_kegg/from_kegg_1.txt"
     )
 
     assert os.path.exists(kegg_results_fp)

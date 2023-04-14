@@ -20,13 +20,13 @@ GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 print(f"sbx_gene_clusters::INFO Found these genes dbs: {str(GENES_DICT)}")
 
 TARGET_GENES = expand(
-    str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
+    str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
     gene=GENES_DICT.keys(),
     sample=Samples.keys(),
 )
 
 
-rule all_gene_family:
+rule all_gene_clusters:
     input:
         TARGET_GENES,
 
@@ -105,46 +105,26 @@ rule fq_2_fa:
         seqtk seq -a < <(gzip -cd {input}) > {output} 2> {log}
         """
 
-
-rule diamond_reads:
+rule gene_hits:
     input:
         read=str(MAPPING_FP / "R1" / "{sample}_1.fasta"),
         db=expand(str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["dmnd"]),
+        db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["txt"]),
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
-    benchmark:
-        BENCHMARK_FP / "diamond_reads_{gene}_{sample}.tsv"
-    log:
-        LOG_FP / "diamond_reads_{gene}_{sample}.log",
-    threads: Cfg["sbx_gene_clusters"]["threads"]
-    conda:
-        "sbx_gene_clusters_env.yml"
-    shell:
-        """
-        diamond blastx \
-            --db {input.db} --query {input.read} \
-            --threads {threads} --evalue 1e-6 \
-            --max-target-seqs 0 \
-            --out {output} \
-            --outfmt 6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore \
-            2>&1 | tee {log}
-        """
-
-
-rule gene_hits:
-    input:
-        aln_fp=str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.m8"),
-        db_annot_fp=expand(str(GENES_DIR / "{{gene}}.{index}"), index=["tsv"]),
-    output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.txt"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
     benchmark:
         BENCHMARK_FP / "gene_hits_{gene}_{sample}.tsv"
     log:
-        LOG_FP / "gene_hits_{gene}_{sample}.log",
+        diamond_log=LOG_FP / "gene_hits_diamond_{gene}_{sample}.log",
+        script_log=LOG_FP / "gene_hits_{gene}_{sample}.log",
     params:
         evalue=float(Cfg["sbx_gene_clusters"]["evalue"]),
         alnLen=Cfg["sbx_gene_clusters"]["alnLen"],
         mismatch=Cfg["sbx_gene_clusters"]["mismatch"],
+        m8=str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.m8"),
+    threads: Cfg["sbx_gene_clusters"]["threads"]
+    conda:
+        "sbx_gene_clusters_env.yml"
     script:
         "scripts/gene_hits.py"
 
@@ -156,7 +136,7 @@ rule blastx_reads:
             str(GENES_DIR / "{{gene}}.fasta.{index}"), index=["psq", "pin", "phr"]
         ),
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "{gene}" / "{sample}_1.blastx"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.blastx"),
     benchmark:
         BENCHMARK_FP / "blastx_reads_{gene}_{sample}.tsv"
     log:
@@ -179,9 +159,9 @@ rule blastx_reads:
 
 rule uniref50_download:
     output:
-        str(MAPPING_FP / "sbx_gene_family" / "databases" / "uniref50.fasta"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "databases" / "uniref50.fasta"),
     params:
-        str(MAPPING_FP / "sbx_gene_family" / "databases"),
+        str(MAPPING_FP / "sbx_gene_clusters" / "databases"),
     shell:
         """
         set +o pipefail

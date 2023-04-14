@@ -1,0 +1,14 @@
+.tests/e2e/__pycache__/
+logs
+stats/
+.tests/data/dbs/tiny_kegg.fasta.dmnd
+.tests/data/hosts/human.fasta.amb
+.tests/data/hosts/human.fasta.ann
+.tests/data/hosts/human.fasta.bwt
+.tests/data/hosts/human.fasta.pac
+.tests/data/hosts/human.fasta.sa
+.tests/data/hosts/phix174.fasta.amb
+.tests/data/hosts/phix174.fasta.ann
+.tests/data/hosts/phix174.fasta.bwt
+.tests/data/hosts/phix174.fasta.pac
+.tests/data/hosts/phix174.fasta.sa
