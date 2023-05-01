@@ -1,6 +1,6 @@
 sbx_gene_clusters:
   threads: 8
-  genes_fp: 
+  genes_fp: ''
   evalue: 1e-5
   alnLen: 30
   mismatch: 3
