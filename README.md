@@ -29,7 +29,7 @@ Be sure to update the `config.yml` with the proper path.
 To generate alignments,
 
  ```bash
- sunbeam run --profile /path/to/project all_gene_family
+ sunbeam run --profile /path/to/project all_gene_clusters
  ```
 
 ## Configuration
