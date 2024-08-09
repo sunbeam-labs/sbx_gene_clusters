@@ -7,7 +7,7 @@
 [![Super-Linter](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/linter.yml/badge.svg)](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/linter.yml)
 <!-- Badges end -->
 
-Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. 
+Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. Make a diamond database from your proteins of interest fasta file and provide a text annotation file with the following columns: geneID, proteinID, ARO, taxon, weight. 
 
 ## Installation
 
