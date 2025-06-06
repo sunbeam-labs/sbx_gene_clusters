@@ -88,7 +88,6 @@ rule build_gene_clusters_blast_db:
 rule fq_2_fa:
     input:
         QC_FP / "decontam" / "{sample}_1.fastq.gz",
-        #MAPPING_FP / "merged" / "{sample}.fastq",
     output:
         MAPPING_FP / "R1" / "{sample}_1.fasta",
     benchmark:
