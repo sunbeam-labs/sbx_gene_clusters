@@ -3,34 +3,12 @@
 # sbx_gene_clusters
 
 <!-- Badges start -->
-[![Tests](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/main.yml/badge.svg)](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/main.yml)
-[![Super-Linter](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/linter.yml/badge.svg)](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/linter.yml)
+[![Tests](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/tests.yml/badge.svg)](https://github.com/sunbeam-labs/sbx_gene_clusters/actions/workflows/tests.yml)
+![Condabot](https://img.shields.io/badge/condabot-active-purple)
+[![DockerHub](https://img.shields.io/docker/pulls/sunbeamlabs/sbx_gene_clusters)](https://hub.docker.com/repository/docker/sunbeamlabs/sbx_gene_clusters/)
 <!-- Badges end -->
 
-Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. Make a diamond database from your proteins of interest fasta file and provide a text annotation file with the following columns: geneID, proteinID, ARO, taxon, weight. 
-
-## Installation
-
-To install, activate your conda environment (using the name of your environment) and use `sunbeam extend`:
-
-    conda activate <i>sunbeamX.X.X</i>
-    sunbeam extend https://github.com/sunbeam-labs/sbx_gene_clusters.git
-
-Now take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. First download the uniref50.fasta into your current `sunbeam_output/mapping/sbx_gene_family/databases/`.
-
- ```bash
- mkdir -p sunbeam_output/mapping/sbx_gene_family/database/
- wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref50/uniref50.fasta.gz -P sunbeam_output/mapping/sbx_gene_family/database/
- ```
-Be sure to update the `config.yml` with the proper path.
-
-## Usage
- 
-To generate alignments,
-
- ```bash
- sunbeam run --profile /path/to/project all_gene_clusters
- ```
+Reads-level based alignment to gene clusters of interest, e.g. bai operon or butyrate producing genes. Please refer to [sunbeam_database](https://github.com/zhaoc1/sunbeam_databases.git) for details. Make a diamond database from your proteins of interest fasta file and provide a text annotation file with the following columns: geneID, proteinID, ARO, taxon, weight.
 
 ## Configuration
 
@@ -40,13 +18,13 @@ To generate alignments,
  - alnLen: 
  - mismatch: 
 
-## Legacy Installation
+Take [**UniRef50** database](https://www.uniprot.org/downloads) as an example. Download it and point `sunbeam_config.yml` to it:
 
-For sunbeam versions <3 or if `sunbeam extend` isn't working, you can use `git` directly to install an extension:
+ ```bash
+ mkdir -p /path/to/uniref50/
+ wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref50/uniref50.fasta.gz -P /path/to/uniref50/
+ ```
 
-    git clone https://github.com/sunbeam-labs/sbx_gene_clusters.git extensions/sbx_gene_clusters
+## Docs
 
-and then include it in the config for any given project with:
-
-    cat extensions/sbx_gene_clusters/config.yml >> /path/to/project/sunbeam_config.yml
- 
+More [docs](https://sunbeam.readthedocs.io/en/stable/extensions.html).
