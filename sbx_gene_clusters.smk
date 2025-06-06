@@ -1,3 +1,6 @@
+from pathlib import PurePath
+
+
 try:
     SBX_GENE_CLUSTERS_VERSION = get_ext_version("sbx_gene_clusters")
 except NameError:
@@ -25,7 +28,7 @@ rule merge_pairs:
         r1=QC_FP / "decontam" / "{sample}_1.fastq.gz",
         r2=QC_FP / "decontam" / "{sample}_2.fastq.gz",
     output:
-        r1=MAPPING_FP / "merged" / "{sample}.fastq",
+        reads=MAPPING_FP / "merged" / "{sample}.fastq",
     benchmark:
         BENCHMARK_FP / "merge_pairs_{sample}.tsv"
     log:
@@ -36,10 +39,14 @@ rule merge_pairs:
     shell:
         """
         vsearch \
-        --fastq_mergepairs {input.r1} --reverse {input.r2} \
-        --fastqout {output.reads} --threads {threads} \
-        --fastq_allowmergestagger --fastq_maxdiffs 5 \
-        --fastq_minovlen 10 --fastq_minmergelen 100 \
+        --fastq_mergepairs {input.r1} \
+        --reverse {input.r2} \
+        --fastqout {output.reads} \
+        --threads {threads} \
+        --fastq_allowmergestagger \
+        --fastq_maxdiffs 5 \
+        --fastq_minovlen 10 \
+        --fastq_minmergelen 100 \
         > {log} 2>&1
         """
 
@@ -48,8 +55,7 @@ rule build_gene_clusters_diamond_db:
     input:
         lambda wildcards: GENES_DICT[wildcards.gene],
     output:
-        expand(GENES_DIR / "{{gene}}.fasta.{index}"),
-        index=["dmnd"],
+        expand(GENES_DIR / "{{gene}}.fasta.{index}", index=["dmnd"]),
     benchmark:
         BENCHMARK_FP / "build_gene_clusters_diamond_db_{gene}.tsv"
     log:
@@ -82,6 +88,7 @@ rule build_gene_clusters_blast_db:
 rule fq_2_fa:
     input:
         QC_FP / "decontam" / "{sample}_1.fastq.gz",
+        #MAPPING_FP / "merged" / "{sample}.fastq",
     output:
         MAPPING_FP / "R1" / "{sample}_1.fasta",
     benchmark:
@@ -99,10 +106,8 @@ rule fq_2_fa:
 rule gene_hits:
     input:
         read=MAPPING_FP / "R1" / "{sample}_1.fasta",
-        db=expand(GENES_DIR / "{{gene}}.fasta.{index}"),
-        index=["dmnd"],
-        db_annot_fp=expand(GENES_DIR / "{{gene}}.{index}"),
-        index=["txt"],
+        db=expand(GENES_DIR / "{{gene}}.fasta.{index}", index=["dmnd"]),
+        db_annot_fp=expand(GENES_DIR / "{{gene}}.{index}", index=["txt"]),
     output:
         MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt",
     benchmark:

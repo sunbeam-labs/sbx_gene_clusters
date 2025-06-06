@@ -13,7 +13,7 @@ Reads-level based alignment to gene clusters of interest, e.g. bai operon or but
 ## Configuration
 
  - threads: Is the number of threads to run parallel processes with
- - genes_fp: Is the path to the downloaded database
+ - genes_fp: Is the path to the downloaded database (directory containing .fasta files)
  - evalue: 
  - alnLen: 
  - mismatch: 
