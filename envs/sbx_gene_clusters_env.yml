@@ -1,6 +1,7 @@
 name: sbx_gene_clusters
 channels:
   - bioconda
+  - conda-forge
 dependencies:
   - diamond
   - seqtk

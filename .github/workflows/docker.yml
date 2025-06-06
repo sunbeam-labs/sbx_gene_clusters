@@ -1,0 +1,42 @@
+name: Push to DockerHub
+
+on:
+  workflow_call:
+
+  workflow_dispatch:
+
+jobs:
+    build-and-push-to-dockerhub:
+        name: Push Docker image to Docker Hub
+        runs-on: ubuntu-latest
+    
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            
+            - name: Get sbx version
+              shell: bash
+              run: |
+                SBX_VER=$(cat VERSION)
+                echo "SBX_VER=$SBX_VER" >> $GITHUB_ENV
+            
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+            
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                images: sunbeamlabs/sbx_gene_clusters
+            
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                context: .
+                file: envs/sbx_gene_clusters_env.Dockerfile
+                push: true
+                tags: sunbeamlabs/sbx_gene_clusters:${{ env.SBX_VER }}
+                labels: ${{ steps.meta.outputs.labels }}

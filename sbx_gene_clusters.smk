@@ -1,17 +1,8 @@
-# -*- mode: Snakemake -*-
-#
-# Chunyu Zhao 2018-07-23
-# Reads mapping to gene clusters/pathways/gene families of interest:
-#   Rules for Diamond or BLASTx reads against protein databases
-
 try:
-    BENCHMARK_FP
+    SBX_GENE_CLUSTERS_VERSION = get_ext_version("sbx_gene_clusters")
 except NameError:
-    BENCHMARK_FP = output_subdir(Cfg, "benchmarks")
-try:
-    LOG_FP
-except NameError:
-    LOG_FP = output_subdir(Cfg, "logs")
+    # For backwards compatibility with older versions of Sunbeam
+    SBX_GENE_CLUSTERS_VERSION = "0.0.0"
 
 GENES_DIR = Cfg["sbx_gene_clusters"]["genes_fp"]
 GENES_KEY = [PurePath(f.name).stem for f in GENES_DIR.glob("*.fasta")]
@@ -19,16 +10,14 @@ GENES_VAL = [str(GENES_DIR) + "/" + g + ".fasta" for g in GENES_KEY]
 GENES_DICT = dict(zip(GENES_KEY, GENES_VAL))
 print(f"sbx_gene_clusters::INFO Found these genes dbs: {str(GENES_DICT)}")
 
-TARGET_GENES = expand(
-    str(MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt"),
-    gene=GENES_DICT.keys(),
-    sample=Samples.keys(),
-)
-
 
 rule all_gene_clusters:
     input:
-        TARGET_GENES,
+        expand(
+            MAPPING_FP / "sbx_gene_clusters" / "{gene}" / "{sample}_1.txt",
+            gene=GENES_DICT.keys(),
+            sample=Samples.keys(),
+        ),
 
 
 rule merge_pairs:
