@@ -143,6 +143,7 @@ with open(snakemake.log[0], "w") as log:
         log.write(e.output.decode())
         sys.exit(e.returncode)
     log.write(ret.decode())
+    log.write("DIAMOND blastx completed successfully.\n\n\n")
 
 with open(snakemake.log[0], "a") as log:
     write_gene_hits(
