@@ -67,8 +67,7 @@ rule gene_hits:
     benchmark:
         BENCHMARK_FP / "gene_hits_{gene}_{sample}.tsv"
     log:
-        diamond_log=LOG_FP / "gene_hits_diamond_{gene}_{sample}.log",
-        script_log=LOG_FP / "gene_hits_{gene}_{sample}.log",
+        LOG_FP / "gene_hits_{gene}_{sample}.log",
     params:
         evalue=float(Cfg["sbx_gene_clusters"]["evalue"]),
         alnLen=Cfg["sbx_gene_clusters"]["alnLen"],
