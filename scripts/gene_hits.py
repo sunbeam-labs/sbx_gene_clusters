@@ -102,7 +102,7 @@ def write_gene_hits(in_fp, out_fp, db_annot_fp, evalue, alnLen, mismatch, log):
     os.remove(in_fp)
 
 
-with open(snakemake.log.diamond_log, "w") as log:
+with open(snakemake.log[0], "w") as log:
     try:
         ret = sp.check_output(
             [
@@ -144,7 +144,7 @@ with open(snakemake.log.diamond_log, "w") as log:
         sys.exit(e.returncode)
     log.write(ret.decode())
 
-with open(snakemake.log.script_log, "w") as log:
+with open(snakemake.log[0], "a") as log:
     write_gene_hits(
         snakemake.params.m8,
         snakemake.output[0],
