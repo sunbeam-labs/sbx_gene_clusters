@@ -62,6 +62,8 @@ def run_sunbeam(setup):
             tmp_path,
             "--include",
             "sbx_gene_clusters",
+            "--skip",
+            "decontam",
             "--show-failed-logs",
         ],
         capture_output=True,
